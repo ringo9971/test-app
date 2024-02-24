@@ -1,9 +1,8 @@
-use crate::error::Error;
 use crate::firestore::connect;
-use actix_web::HttpResponse;
+use crate::{error::Error, models::user::User};
+use actix_web::web;
 use firestore_db_and_auth::documents;
 use futures_util::StreamExt;
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -14,12 +13,7 @@ pub enum GetUsersError {
     FirestoreError,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-struct User {
-    name: String,
-}
-
-pub async fn get_users() -> Result<HttpResponse, Error> {
+pub async fn get_users() -> Result<web::Json<Vec<User>>, Error> {
     let session = connect()
         .await
         .map_err(|_| GetUsersError::ConnectionError)?;
@@ -34,5 +28,5 @@ pub async fn get_users() -> Result<HttpResponse, Error> {
         users.push(user);
     }
 
-    Ok(HttpResponse::Ok().body(format!("{:?}", users)))
+    Ok(web::Json(users))
 }

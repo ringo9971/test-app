@@ -1,12 +1,14 @@
 use actix_web::{HttpResponse, ResponseError};
 use thiserror::Error;
 
-use crate::api::get_users::GetUsersError;
+use crate::api::{create_user::CreateUserError, get_users::GetUsersError};
 
 #[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
     GetUsersError(#[from] GetUsersError),
+    #[error(transparent)]
+    CreateUserError(#[from] CreateUserError),
     #[error(transparent)]
     StdIOError(#[from] std::io::Error),
     #[error(transparent)]
@@ -21,11 +23,7 @@ impl From<actix_web::Error> for Error {
 
 impl ResponseError for Error {
     fn status_code(&self) -> actix_web::http::StatusCode {
-        match self {
-            Error::GetUsersError(_) => actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
-            Error::StdIOError(_) => actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
-            Error::ResponseError(_) => actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
-        }
+        actix_web::http::StatusCode::INTERNAL_SERVER_ERROR
     }
 
     fn error_response(&self) -> HttpResponse {
