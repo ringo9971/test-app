@@ -9,12 +9,17 @@ pub enum FirestoreError {
     FailedGetEnv,
     #[error(transparent)]
     FirebaseError(#[from] FirebaseError),
+    #[error("failed get env error")]
+    FailedDeserializeCredentials,
 }
 
 pub async fn connect() -> Result<ServiceSession, FirestoreError> {
-    let credential_file = env::var("CREDENTIAL_FILE").map_err(|_| FirestoreError::FailedGetEnv)?;
-    let cred = Credentials::from_file(&credential_file).await?;
-    ServiceSession::new(cred)
+    let credentials_json =
+        env::var("CREDENTIALS_JSON").map_err(|_| FirestoreError::FailedGetEnv)?;
+    let mut credentials: Credentials = serde_json::from_str(&credentials_json)
+        .map_err(|_| FirestoreError::FailedDeserializeCredentials)?;
+    credentials.compute_secret().await?;
+    ServiceSession::new(credentials)
         .await
         .map_err(FirestoreError::FirebaseError)
 }

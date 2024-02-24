@@ -1,4 +1,4 @@
-use crate::firestore::connect;
+use crate::firestore::{connect, FirestoreError};
 use crate::{error::Error, models::user::User};
 use actix_web::web;
 use firestore_db_and_auth::documents;
@@ -7,16 +7,12 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum GetUsersError {
-    #[error("connection error")]
-    ConnectionError,
     #[error("firestore error")]
-    FirestoreError,
+    FirestoreError(#[from] FirestoreError),
 }
 
 pub async fn get_users() -> Result<web::Json<Vec<User>>, Error> {
-    let session = connect()
-        .await
-        .map_err(|_| GetUsersError::ConnectionError)?;
+    let session = connect().await.map_err(GetUsersError::FirestoreError)?;
 
     let mut stream = documents::list(&session, "users");
 

@@ -1461,6 +1461,7 @@ dependencies = [
  "firestore-db-and-auth",
  "futures-util",
  "serde",
+ "serde_json",
  "thiserror",
 ]
 
