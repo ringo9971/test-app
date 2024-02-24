@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use test_api::{
@@ -9,12 +11,14 @@ use test_api::{
 async fn main() -> Result<(), Error> {
     dotenv().ok();
 
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
+
     HttpServer::new(|| {
         App::new()
             .route("/users", web::post().to(create_user))
             .route("/users", web::get().to(get_users))
     })
-    .bind("127.0.0.1:8080")?
+    .bind(addr)?
     .run()
     .await?;
 
