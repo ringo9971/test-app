@@ -20,7 +20,7 @@ pub async fn create_user(user: web::Json<User>) -> Result<web::Json<User>, Error
     documents::write(
         &session,
         "users",
-        Some("service_test"),
+        Option::None::<String>,
         &user,
         documents::WriteOptions::default(),
     )
