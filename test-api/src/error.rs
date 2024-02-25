@@ -2,7 +2,8 @@ use actix_web::{HttpResponse, ResponseError};
 use thiserror::Error;
 
 use crate::api::{
-    create_user::CreateUserError, get_users::GetUsersError, update_user::UpdateUserError,
+    create_user::CreateUserError, delete_user::DeleteUserError, get_users::GetUsersError,
+    update_user::UpdateUserError,
 };
 
 #[derive(Error, Debug)]
@@ -13,6 +14,8 @@ pub enum Error {
     CreateUserError(#[from] CreateUserError),
     #[error(transparent)]
     UpdateUserError(#[from] UpdateUserError),
+    #[error(transparent)]
+    DeleteUserError(#[from] DeleteUserError),
     #[error(transparent)]
     StdIOError(#[from] std::io::Error),
     #[error(transparent)]
