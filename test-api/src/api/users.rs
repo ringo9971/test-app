@@ -1,11 +1,12 @@
+use crate::error::Error;
 use crate::firestore::{create, delete, get, update};
-use crate::{error::Error, models::user::User};
+use crate::models::user::User;
 use actix_web::web;
 
 pub async fn create_user(user: web::Json<User>) -> Result<web::Json<User>, Error> {
-    let user = create("users", user).await?;
+    let user = create("users", user.into_inner()).await?;
 
-    Ok(user)
+    Ok(web::Json(user))
 }
 
 pub async fn get_users() -> Result<web::Json<Vec<User>>, Error> {
@@ -18,9 +19,9 @@ pub async fn update_user(
     user_uid: web::Path<String>,
     user: web::Json<User>,
 ) -> Result<web::Json<User>, Error> {
-    let user = update("users", &user_uid, user).await?;
+    let user = update("users", &user_uid, user.into_inner()).await?;
 
-    Ok(user)
+    Ok(web::Json(user))
 }
 
 pub async fn delete_user(user_uid: web::Path<String>) -> Result<web::Json<()>, Error> {

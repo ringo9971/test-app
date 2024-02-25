@@ -1,3 +1,4 @@
+use crate::models::model::HasUid;
 use firestore_db_and_auth::{documents, errors::FirebaseError, Credentials, ServiceSession};
 use futures_util::StreamExt;
 use serde::{de::DeserializeOwned, Serialize};
@@ -29,33 +30,40 @@ async fn _write<T>(
     session: &ServiceSession,
     collection_name: &str,
     document_name: Option<&str>,
-    model: &T,
-) -> Result<(), FirestoreError>
+    model: T,
+) -> Result<T, FirestoreError>
 where
-    T: Serialize,
+    T: Serialize + HasUid,
 {
-    documents::write(
+    let result = documents::write(
         session,
         collection_name,
         document_name,
-        model,
+        &model,
         documents::WriteOptions::default(),
     )
     .await?;
 
-    Ok(())
+    let mut model: T = model;
+    model.add_uid(&result.document_id);
+
+    Ok(model)
 }
 
 pub async fn get<T>(collection_name: &str) -> Result<Vec<T>, FirestoreError>
 where
-    T: DeserializeOwned + 'static,
+    T: DeserializeOwned + 'static + HasUid,
 {
     let session = connect().await?;
     let mut stream = documents::list(&session, collection_name);
 
     let mut models = vec![];
-    while let Some(Ok((doc, _metadata))) = stream.next().await {
-        models.push(doc);
+    while let Some(Ok((doc, metadata))) = stream.next().await {
+        if let Some(uid) = metadata.name.split('/').last() {
+            let mut model: T = doc;
+            model.add_uid(uid);
+            models.push(model)
+        }
     }
 
     Ok(models)
@@ -63,11 +71,11 @@ where
 
 pub async fn create<T>(collection_name: &str, model: T) -> Result<T, FirestoreError>
 where
-    T: Serialize,
+    T: Serialize + HasUid + Clone,
 {
     let session = connect().await?;
 
-    _write(&session, collection_name, None, &model).await?;
+    let model = _write(&session, collection_name, None, model).await?;
 
     Ok(model)
 }
@@ -78,11 +86,11 @@ pub async fn update<T>(
     model: T,
 ) -> Result<T, FirestoreError>
 where
-    T: Serialize,
+    T: Serialize + HasUid + Clone,
 {
     let session = connect().await?;
 
-    _write(&session, collection_name, Some(document_name), &model).await?;
+    let model = _write(&session, collection_name, Some(document_name), model).await?;
 
     Ok(model)
 }
