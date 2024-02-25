@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   Button,
   TextField,
   TableContainer,
   Table,
+  IconButton,
   TableHead,
   TableBody,
   TableRow,
@@ -26,15 +28,15 @@ function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [name, setName] = useState<string>("");
 
-  const get = async () => {
+  const getUsers = async () => {
     const users = await apiClient.get<User[]>("users");
     setUsers(users);
   };
   useEffect(() => {
-    get();
+    getUsers();
   }, []);
 
-  const create = async () => {
+  const createUser = async () => {
     const create_user = {
       name,
     };
@@ -43,12 +45,17 @@ function App() {
     setName("");
   };
 
+  const deleteUser = async (user_uid: string) => {
+    await apiClient.delete(`users/${user_uid}`);
+    setUsers((users) => users.filter((u) => u.user_uid != user_uid));
+  };
+
   return (
     <>
       <h1>test-app</h1>
       <Box>
         <TextField value={name} onChange={(e) => setName(e.target.value)} />
-        <Button variant="contained" onClick={create}>
+        <Button variant="contained" onClick={createUser}>
           追加
         </Button>
       </Box>
@@ -57,12 +64,18 @@ function App() {
           <TableHead>
             <TableRow>
               <TableCell>名前</TableCell>
+              <TableCell>削除</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {users.map(({ name, user_uid }) => (
               <TableRow key={user_uid}>
                 <TableCell>{name}</TableCell>
+                <TableCell>
+                  <IconButton onClick={() => deleteUser(user_uid)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

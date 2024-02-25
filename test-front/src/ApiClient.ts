@@ -33,6 +33,17 @@ class ApiClient {
       );
     }
   }
+
+  async delete(endpoint: string) {
+    try {
+      const response: AxiosResponse = await this.axiosInstance.delete(endpoint);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        "Failed to delete data from ${endpoint}: ${errro.message}"
+      );
+    }
+  }
 }
 
 export default ApiClient;
