@@ -3,10 +3,7 @@ use std::net::SocketAddr;
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use test_api::{
-    api::{
-        create_user::create_user, delete_user::delete_user, get_users::get_users,
-        update_user::update_user,
-    },
+    api::users::{create_user, delete_user, get_users, update_user},
     error::Error,
 };
 
