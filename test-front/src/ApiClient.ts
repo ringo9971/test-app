@@ -34,6 +34,20 @@ class ApiClient {
     }
   }
 
+  async update<T, R>(endpoint: string, model: T): Promise<R> {
+    try {
+      const response: AxiosResponse<R> = await this.axiosInstance.put(
+        endpoint,
+        model
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        "Failed to create data from ${endpoint}, model ${model}: ${errro.message}"
+      );
+    }
+  }
+
   async delete(endpoint: string) {
     try {
       const response: AxiosResponse = await this.axiosInstance.delete(endpoint);
