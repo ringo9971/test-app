@@ -3,7 +3,7 @@ use std::net::SocketAddr;
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use test_api::{
-    api::{create_user::create_user, get_users::get_users},
+    api::{create_user::create_user, get_users::get_users, update_user::update_user},
     error::Error,
 };
 
@@ -17,6 +17,7 @@ async fn main() -> Result<(), Error> {
         App::new()
             .route("/users", web::post().to(create_user))
             .route("/users", web::get().to(get_users))
+            .route("/users/{user_uid}", web::put().to(update_user))
     })
     .bind(addr)?
     .run()
