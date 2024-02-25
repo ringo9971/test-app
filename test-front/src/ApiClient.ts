@@ -19,6 +19,20 @@ class ApiClient {
       );
     }
   }
+
+  async create<T, R>(endpoint: string, model: T): Promise<R> {
+    try {
+      const response: AxiosResponse<R> = await this.axiosInstance.post(
+        endpoint,
+        model
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        "Failed to create data from ${endpoint}, model ${model}: ${errro.message}"
+      );
+    }
+  }
 }
 
 export default ApiClient;
