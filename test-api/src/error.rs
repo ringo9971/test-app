@@ -1,21 +1,12 @@
 use actix_web::{HttpResponse, ResponseError};
 use thiserror::Error;
 
-use crate::api::{
-    create_user::CreateUserError, delete_user::DeleteUserError, get_users::GetUsersError,
-    update_user::UpdateUserError,
-};
+use crate::firestore::FirestoreError;
 
 #[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
-    GetUsersError(#[from] GetUsersError),
-    #[error(transparent)]
-    CreateUserError(#[from] CreateUserError),
-    #[error(transparent)]
-    UpdateUserError(#[from] UpdateUserError),
-    #[error(transparent)]
-    DeleteUserError(#[from] DeleteUserError),
+    FirestoreError(#[from] FirestoreError),
     #[error(transparent)]
     StdIOError(#[from] std::io::Error),
     #[error(transparent)]
