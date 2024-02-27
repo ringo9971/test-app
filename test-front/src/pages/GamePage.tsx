@@ -60,9 +60,7 @@ const ChatApp = (): JSX.Element => {
     }
   };
 
-  const handleSubmit = (ev: React.FormEvent) => {
-    ev.preventDefault();
-
+  const handleSubmit = () => {
     if (!socket) {
       return;
     }
@@ -111,17 +109,14 @@ const ChatApp = (): JSX.Element => {
           </Box>
         ))}
       </Box>
-      <Box>
-        <Input
-          type="text"
-          id="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-        />
-        <Button variant="contained" onSubmit={handleSubmit}>
-          送信する
-        </Button>
-      </Box>
+      <Input value={inputText} onChange={(e) => setInputText(e.target.value)} />
+      <Button
+        variant="contained"
+        onClick={handleSubmit}
+        disabled={socket === null}
+      >
+        送信する
+      </Button>
     </Box>
   );
 };
