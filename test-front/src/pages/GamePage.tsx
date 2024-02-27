@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Input, Box, Button, FormControl } from "@mui/material";
+import { Input, Box, Button } from "@mui/material";
 
 interface LogEntry {
   message: string;
