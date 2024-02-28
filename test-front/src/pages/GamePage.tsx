@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input, Box, Button } from "@mui/material";
 
 interface LogEntry {
@@ -11,10 +11,28 @@ const ChatApp = (): JSX.Element => {
   const [status, setStatus] = useState("disconnected");
   const [log, setLog] = useState<LogEntry[]>([]);
   const [inputText, setInputText] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
 
   const logMessage = (msg: string, type = "status") => {
     setLog((prevLog) => [...prevLog, { message: msg, type: type }]);
   };
+
+  const retryConnect = () => {
+    const timeoutId = setTimeout(() => {
+      connect();
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  };
+
+  useEffect(() => {
+    if (retryCount == 0) {
+      return;
+    }
+    if (retryCount <= 3) {
+      retryConnect();
+    }
+  }, [retryCount]);
 
   const connect = () => {
     disconnect();
@@ -30,6 +48,7 @@ const ChatApp = (): JSX.Element => {
       logMessage("Connected");
       setSocket(newSocket);
       updateConnectionStatus();
+      setRetryCount(0);
     };
 
     newSocket.onmessage = (ev: MessageEvent) => {
@@ -40,6 +59,8 @@ const ChatApp = (): JSX.Element => {
       logMessage("Disconnected");
       setSocket(null);
       updateConnectionStatus();
+
+      setRetryCount((count) => count + 1);
     };
   };
 
@@ -79,7 +100,17 @@ const ChatApp = (): JSX.Element => {
 
   return (
     <Box>
-      <Button variant="contained" onClick={socket ? disconnect : connect}>
+      <Button
+        variant="contained"
+        onClick={() => {
+          if (socket) {
+            disconnect();
+          } else {
+            setRetryCount(0);
+            retryConnect();
+          }
+        }}
+      >
         {socket ? "切断" : "接続"}
       </Button>
       <Box display="flex">
