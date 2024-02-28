@@ -44,6 +44,7 @@ async fn main() -> Result<(), Error> {
             .route("/ws", web::get().to(game_route))
     })
     .bind(addr)?
+    .workers(3)
     .run()
     .await?;
 
