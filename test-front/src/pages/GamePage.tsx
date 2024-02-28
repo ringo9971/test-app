@@ -47,7 +47,7 @@ const ChatApp = (): JSX.Element => {
     newSocket.onopen = () => {
       logMessage("Connected");
       setSocket(newSocket);
-      updateConnectionStatus();
+      setStatus("connected");
       setRetryCount(0);
     };
 
@@ -58,7 +58,7 @@ const ChatApp = (): JSX.Element => {
     newSocket.onclose = () => {
       logMessage("Disconnected");
       setSocket(null);
-      updateConnectionStatus();
+      setStatus("disconnected");
 
       setRetryCount((count) => count + 1);
     };
@@ -69,14 +69,6 @@ const ChatApp = (): JSX.Element => {
       logMessage("Disconnecting...");
       socket.close();
       setSocket(null);
-      updateConnectionStatus();
-    }
-  };
-
-  const updateConnectionStatus = () => {
-    if (socket) {
-      setStatus("connected");
-    } else {
       setStatus("disconnected");
     }
   };
