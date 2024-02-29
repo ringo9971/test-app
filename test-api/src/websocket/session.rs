@@ -40,6 +40,7 @@ impl Actor for WsGameSession {
         self.addr
             .send(server::Connect {
                 addr: addr.recipient(),
+                room: self.room.to_owned(),
             })
             .into_actor(self)
             .then(|res, act, ctx| {

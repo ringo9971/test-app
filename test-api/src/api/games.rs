@@ -8,6 +8,7 @@ use crate::websocket::{server, session};
 
 pub async fn game_route(
     req: HttpRequest,
+    game_id: web::Path<String>,
     stream: web::Payload,
     srv: web::Data<Addr<server::GameServer>>,
 ) -> Result<HttpResponse, Error> {
@@ -15,7 +16,7 @@ pub async fn game_route(
         session::WsGameSession {
             id: 0,
             hb: Instant::now(),
-            room: "Main".to_owned(),
+            room: game_id.to_string(),
             name: None,
             addr: srv.get_ref().clone(),
         },

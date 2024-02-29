@@ -41,7 +41,7 @@ async fn main() -> Result<(), Error> {
             .route("/users", web::get().to(get_users))
             .route("/users/{user_uid}", web::put().to(update_user))
             .route("/users/{user_uid}", web::delete().to(delete_user))
-            .route("/ws", web::get().to(game_route))
+            .route("games/{game_id}/ws", web::get().to(game_route))
     })
     .bind(addr)?
     .workers(3)

@@ -17,6 +17,7 @@ pub struct Message(pub String);
 #[rtype(usize)]
 pub struct Connect {
     pub addr: Recipient<Message>,
+    pub room: String,
 }
 
 #[derive(Message)]
@@ -92,15 +93,18 @@ impl Handler<Connect> for GameServer {
     fn handle(&mut self, msg: Connect, _: &mut Context<Self>) -> Self::Result {
         println!("Someone joined");
 
-        self.send_message("Main", "Someone joined", 0);
+        self.send_message(&msg.room, "Someone joined", 0);
 
         let id = self.rng.gen::<usize>();
         self.sessions.insert(id, msg.addr);
 
-        self.rooms.entry("Main".to_owned()).or_default().insert(id);
+        self.rooms
+            .entry(msg.room.to_owned())
+            .or_default()
+            .insert(id);
 
         let count = self.visitor_count.fetch_add(1, Ordering::SeqCst);
-        self.send_message("Main", &format!("Total visitors {count}"), 0);
+        self.send_message(&msg.room, &format!("Total visitors {count}"), 0);
 
         id
     }
