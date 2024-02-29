@@ -13,6 +13,8 @@ const ChatApp = (): JSX.Element => {
   const [inputText, setInputText] = useState("");
   const [retryCount, setRetryCount] = useState(0);
 
+  const [gameId, setGameId] = useState("");
+
   const logMessage = (msg: string, type = "status") => {
     setLog((prevLog) => [...prevLog, { message: msg, type: type }]);
   };
@@ -26,7 +28,7 @@ const ChatApp = (): JSX.Element => {
   };
 
   useEffect(() => {
-    if (retryCount == 0) {
+    if (retryCount <= 0) {
       return;
     }
     if (retryCount <= 3) {
@@ -35,11 +37,14 @@ const ChatApp = (): JSX.Element => {
   }, [retryCount]);
 
   const connect = () => {
+    if (gameId === "") {
+      return;
+    }
     disconnect();
 
     const proto = window.location.protocol.startsWith("https") ? "wss" : "ws";
     const host = import.meta.env.VITE_API_HOST;
-    const wsUri = `${proto}://${host}/ws`;
+    const wsUri = `${proto}://${host}/games/${gameId}/ws`;
 
     logMessage("Connecting...");
     const newSocket = new WebSocket(wsUri);
@@ -92,14 +97,20 @@ const ChatApp = (): JSX.Element => {
 
   return (
     <Box>
+      <Input
+        value={gameId}
+        onChange={(e) => setGameId(e.target.value)}
+        disabled={status === "connected"}
+      />
       <Button
         variant="contained"
         onClick={() => {
           if (socket) {
+            setRetryCount(-1);
             disconnect();
           } else {
             setRetryCount(0);
-            retryConnect();
+            connect();
           }
         }}
       >
