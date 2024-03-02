@@ -1,12 +1,14 @@
 use actix_web::{HttpResponse, ResponseError};
 use thiserror::Error;
 
-use crate::firestore::FirestoreError;
+use crate::{config::ConfigError, firestore::FirestoreError};
 
 #[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
     FirestoreError(#[from] FirestoreError),
+    #[error(transparent)]
+    ConfigError(#[from] ConfigError),
     #[error(transparent)]
     StdIOError(#[from] std::io::Error),
     #[error(transparent)]

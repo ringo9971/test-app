@@ -4,6 +4,7 @@ use actix::*;
 use actix_web::{web, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 
+use crate::config::Config;
 use crate::error::Error;
 use crate::firestore;
 use crate::models::chat::{Chat, Message};
@@ -31,14 +32,23 @@ pub async fn game_route(
 pub async fn write_message(
     room_id: web::Path<String>,
     message: web::Json<Message>,
+    config: web::Data<Config>,
 ) -> Result<web::Json<Chat>, Error> {
-    let chat = firestore::write_message(&room_id.into_inner(), message.into_inner()).await?;
+    let chat = firestore::write_message(
+        &config.firestore,
+        &room_id.into_inner(),
+        message.into_inner(),
+    )
+    .await?;
 
     Ok(web::Json(chat))
 }
 
-pub async fn get_chat(room_id: web::Path<String>) -> Result<web::Json<Chat>, Error> {
-    let chat = firestore::get_chat(&room_id.into_inner()).await?;
+pub async fn get_chat(
+    room_id: web::Path<String>,
+    config: web::Data<Config>,
+) -> Result<web::Json<Chat>, Error> {
+    let chat = firestore::get_chat(&config.firestore, &room_id.into_inner()).await?;
 
     Ok(web::Json(chat))
 }

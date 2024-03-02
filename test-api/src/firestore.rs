@@ -1,23 +1,18 @@
-use crate::models::chat::{Chat, Message, Messages};
-use firestore_db_and_auth::{documents, errors::FirebaseError, Credentials, ServiceSession};
-use std::env;
+use crate::{
+    config::FirestoreConfig,
+    models::chat::{Chat, Message, Messages},
+};
+use firestore_db_and_auth::{documents, errors::FirebaseError, ServiceSession};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum FirestoreError {
-    #[error("failed get env error")]
-    FailedGetEnv,
-    #[error("failed get env error")]
-    FailedDeserializeCredentials,
     #[error(transparent)]
     FirebaseError(#[from] FirebaseError),
 }
 
-async fn connect() -> Result<ServiceSession, FirestoreError> {
-    let credentials_json =
-        env::var("CREDENTIALS_JSON").map_err(|_| FirestoreError::FailedGetEnv)?;
-    let mut credentials: Credentials = serde_json::from_str(&credentials_json)
-        .map_err(|_| FirestoreError::FailedDeserializeCredentials)?;
+async fn connect(firestore_config: &FirestoreConfig) -> Result<ServiceSession, FirestoreError> {
+    let mut credentials = firestore_config.credentials.to_owned();
     credentials.compute_secret().await?;
     ServiceSession::new(credentials)
         .await
@@ -41,8 +36,11 @@ async fn _write_message(
     Ok(messages)
 }
 
-pub async fn get_chat(room_id: &str) -> Result<Chat, FirestoreError> {
-    let session = connect().await?;
+pub async fn get_chat(
+    firestore_config: &FirestoreConfig,
+    room_id: &str,
+) -> Result<Chat, FirestoreError> {
+    let session = connect(firestore_config).await?;
 
     let res: Messages = documents::read(&session, "chats", room_id).await?;
 
@@ -52,10 +50,14 @@ pub async fn get_chat(room_id: &str) -> Result<Chat, FirestoreError> {
     })
 }
 
-pub async fn write_message(room_id: &str, message: Message) -> Result<Chat, FirestoreError> {
-    let session = connect().await?;
+pub async fn write_message(
+    firestore_config: &FirestoreConfig,
+    room_id: &str,
+    message: Message,
+) -> Result<Chat, FirestoreError> {
+    let session = connect(firestore_config).await?;
 
-    let mut messages = if let Ok(chat) = get_chat(room_id).await {
+    let mut messages = if let Ok(chat) = get_chat(firestore_config, room_id).await {
         chat.messages
     } else {
         vec![]
