@@ -32,6 +32,8 @@ async fn main() -> Result<(), Error> {
             )
             .app_data(web::Data::from(app_state.clone()))
             .app_data(web::Data::new(server.clone()))
+            .route("games/{game_id}", web::get().to(get_chat))
+            .route("games/{game_id}", web::post().to(write_message))
             .route("games/{game_id}/ws", web::get().to(game_route))
     })
     .bind(addr)?
