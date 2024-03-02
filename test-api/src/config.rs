@@ -1,4 +1,4 @@
-use std::env;
+use std::{collections::BTreeSet, env};
 
 use firestore_db_and_auth::Credentials;
 
@@ -19,7 +19,7 @@ pub struct FirestoreConfig {
 
 #[derive(Debug, Clone)]
 pub struct AuthConfig {
-    pub allowed_user_uids: Vec<String>,
+    pub allowed_user_uids: BTreeSet<String>,
 }
 
 #[derive(Debug, Clone)]

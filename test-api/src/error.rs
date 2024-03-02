@@ -1,7 +1,7 @@
 use actix_web::{HttpResponse, ResponseError};
 use thiserror::Error;
 
-use crate::{config::ConfigError, firestore::FirestoreError};
+use crate::{auth::PermissionError, config::ConfigError, firestore::FirestoreError};
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -9,6 +9,8 @@ pub enum Error {
     FirestoreError(#[from] FirestoreError),
     #[error(transparent)]
     ConfigError(#[from] ConfigError),
+    #[error(transparent)]
+    PermissionError(#[from] PermissionError),
     #[error(transparent)]
     StdIOError(#[from] std::io::Error),
     #[error(transparent)]
