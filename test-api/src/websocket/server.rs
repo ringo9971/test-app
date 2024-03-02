@@ -1,10 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    sync::{
-        atomic::{AtomicUsize, Ordering},
-        Arc,
-    },
-};
+use std::collections::{HashMap, HashSet};
 
 use actix::prelude::*;
 use rand::{self, rngs::ThreadRng, Rng};
@@ -52,20 +46,21 @@ pub struct GameServer {
     sessions: HashMap<usize, Recipient<Message>>,
     rooms: HashMap<String, HashSet<usize>>,
     rng: ThreadRng,
-    visitor_count: Arc<AtomicUsize>,
 }
 
 impl GameServer {
-    pub fn new(visitor_count: Arc<AtomicUsize>) -> GameServer {
-        let mut rooms = HashMap::new();
-        rooms.insert("Main".to_owned(), HashSet::new());
-
+    pub fn new() -> GameServer {
         GameServer {
             sessions: HashMap::new(),
-            rooms,
+            rooms: HashMap::new(),
             rng: rand::thread_rng(),
-            visitor_count,
         }
+    }
+}
+
+impl Default for GameServer {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -102,9 +97,6 @@ impl Handler<Connect> for GameServer {
             .entry(msg.room.to_owned())
             .or_default()
             .insert(id);
-
-        let count = self.visitor_count.fetch_add(1, Ordering::SeqCst);
-        self.send_message(&msg.room, &format!("Total visitors {count}"), 0);
 
         id
     }

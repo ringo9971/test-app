@@ -13,7 +13,6 @@ pub struct WsGameSession {
     pub id: usize,
     pub hb: Instant,
     pub room: String,
-    pub name: Option<String>,
     pub addr: Addr<server::GameServer>,
 }
 

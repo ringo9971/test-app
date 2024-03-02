@@ -2,11 +2,7 @@ use actix::Actor;
 use actix_cors::Cors;
 use actix_web::{http::header, web, App, HttpServer};
 use dotenv::dotenv;
-use std::{
-    env,
-    net::SocketAddr,
-    sync::{atomic::AtomicUsize, Arc},
-};
+use std::{env, net::SocketAddr};
 use test_api::api::games::*;
 use test_api::error::Error;
 use test_api::websocket::server;
@@ -15,8 +11,7 @@ use test_api::websocket::server;
 async fn main() -> Result<(), Error> {
     dotenv().ok();
 
-    let app_state = Arc::new(AtomicUsize::new(0));
-    let server = server::GameServer::new(app_state.clone()).start();
+    let server = server::GameServer::new().start();
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     let allowed_origin = env::var("APP_BASE_URL").expect("failed get env var (APP_BASE_URL)");
@@ -30,7 +25,6 @@ async fn main() -> Result<(), Error> {
                     .allowed_header(header::CONTENT_TYPE)
                     .max_age(3600),
             )
-            .app_data(web::Data::from(app_state.clone()))
             .app_data(web::Data::new(server.clone()))
             .route("games/{game_id}", web::get().to(get_chat))
             .route("games/{game_id}", web::post().to(write_message))

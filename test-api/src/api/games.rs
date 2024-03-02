@@ -20,7 +20,6 @@ pub async fn game_route(
             id: 0,
             hb: Instant::now(),
             room: game_id.to_string(),
-            name: None,
             addr: srv.get_ref().clone(),
         },
         &req,
