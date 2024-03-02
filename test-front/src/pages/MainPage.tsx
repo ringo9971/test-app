@@ -54,7 +54,7 @@ function App() {
   };
   useEffect(() => {
     getUsers();
-  }, []);
+  }, [getUsers]);
 
   const createUser = async () => {
     const create_user = {
@@ -67,7 +67,7 @@ function App() {
 
   const updateUser = async () => {
     if (editUser === null || editUserUid === null) return;
-    let update_user = await apiClient.update<UpdateUser, User>(
+    const update_user = await apiClient.update<UpdateUser, User>(
       `users/${editUserUid}`,
       editUser
     );

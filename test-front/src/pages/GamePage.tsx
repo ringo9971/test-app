@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
 import { Input, Box, Button } from "@mui/material";
+import ApiClient from "../ApiClient";
 
 interface LogEntry {
   message: string;
   type: string;
+}
+
+interface Messages {
+  messages: Message[];
+}
+
+interface Message {
+  message: string;
 }
 
 const ChatApp = (): JSX.Element => {
@@ -14,6 +23,8 @@ const ChatApp = (): JSX.Element => {
   const [retryCount, setRetryCount] = useState(0);
 
   const [gameId, setGameId] = useState("");
+
+  const apiClient = new ApiClient();
 
   const logMessage = (msg: string, type = "status") => {
     setLog((prevLog) => [...prevLog, { message: msg, type: type }]);
@@ -28,12 +39,16 @@ const ChatApp = (): JSX.Element => {
   };
 
   useEffect(() => {
-    if (retryCount <= 0) {
-      return;
-    }
-    if (retryCount <= 3) {
-      retryConnect();
-    }
+    const retryConnectCallback = () => {
+      if (retryCount <= 0) {
+        return;
+      }
+      if (retryCount <= 3) {
+        retryConnect();
+      }
+    };
+
+    retryConnectCallback();
   }, [retryCount]);
 
   const connect = () => {
@@ -53,11 +68,19 @@ const ChatApp = (): JSX.Element => {
       logMessage("Connected");
       setSocket(newSocket);
       setStatus("connected");
+      handleOpen();
       setRetryCount(0);
     };
 
     newSocket.onmessage = (ev: MessageEvent) => {
-      logMessage("Received: " + ev.data, "message");
+      let message: Message;
+      try {
+        message = JSON.parse(ev.data) as Message;
+      } catch (e) {
+        message = { message: ev.data };
+      }
+
+      logMessage(message.message);
     };
 
     newSocket.onclose = () => {
@@ -78,6 +101,11 @@ const ChatApp = (): JSX.Element => {
     }
   };
 
+  const handleOpen = async () => {
+    const res = await apiClient.get<Messages>(`games/${gameId}`);
+    setLog(res.messages.map((m) => ({ message: m.message, type: "status" })));
+  };
+
   const handleSubmit = () => {
     if (!socket) {
       return;
@@ -89,8 +117,11 @@ const ChatApp = (): JSX.Element => {
       return;
     }
 
-    logMessage("Sending: " + text);
-    socket.send(text);
+    logMessage(text);
+
+    const message: Message = { message: text };
+    socket.send(JSON.stringify(message));
+    apiClient.create(`games/${gameId}`, message);
 
     setInputText("");
   };
