@@ -7,14 +7,9 @@ use std::{
     net::SocketAddr,
     sync::{atomic::AtomicUsize, Arc},
 };
-use test_api::{
-    api::{
-        games::game_route,
-        users::{create_user, delete_user, get_users, update_user},
-    },
-    error::Error,
-    websocket::server,
-};
+use test_api::api::games::*;
+use test_api::error::Error;
+use test_api::websocket::server;
 
 #[actix_web::main]
 async fn main() -> Result<(), Error> {
@@ -37,10 +32,6 @@ async fn main() -> Result<(), Error> {
             )
             .app_data(web::Data::from(app_state.clone()))
             .app_data(web::Data::new(server.clone()))
-            .route("/users", web::post().to(create_user))
-            .route("/users", web::get().to(get_users))
-            .route("/users/{user_uid}", web::put().to(update_user))
-            .route("/users/{user_uid}", web::delete().to(delete_user))
             .route("games/{game_id}/ws", web::get().to(game_route))
     })
     .bind(addr)?
