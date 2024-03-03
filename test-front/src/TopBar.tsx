@@ -16,6 +16,7 @@ import { useUser } from "./hooks/useUser";
 
 import { Logout } from "@mui/icons-material";
 import { useLogout } from "./hooks/useLogout";
+import { useNavigate } from "react-router-dom";
 
 const TopBar = (): JSX.Element => {
   const { user, loading } = useUser();
@@ -23,6 +24,7 @@ const TopBar = (): JSX.Element => {
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -36,7 +38,7 @@ const TopBar = (): JSX.Element => {
       <AppBar position="static">
         <Toolbar>
           <Box flexGrow="1">
-            <Button href="/" color="inherit">
+            <Button onClick={() => navigate("/")} color="inherit">
               test-app
             </Button>
           </Box>
@@ -66,7 +68,7 @@ const TopBar = (): JSX.Element => {
             </Box>
           ) : (
             !loading && (
-              <Button href="/login" color="inherit">
+              <Button onClick={() => navigate("/login")} color="inherit">
                 ログインはこちらから
               </Button>
             )
