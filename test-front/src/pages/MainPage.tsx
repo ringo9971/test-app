@@ -17,7 +17,7 @@ import {
   TableRow,
   TableCell,
 } from "@mui/material";
-import ApiClient from "../ApiClient";
+import { useApiClient } from "../lib/ApiClientContext";
 
 interface CreateUser {
   name: string;
@@ -33,7 +33,7 @@ interface User {
 }
 
 function App() {
-  const apiClient = new ApiClient();
+  const { apiClient } = useApiClient();
   const [users, setUsers] = useState<User[]>([]);
   const [name, setName] = useState<string>("");
   const [editUser, setEditUser] = useState<UpdateUser | null>(null);
@@ -60,14 +60,14 @@ function App() {
     const create_user = {
       name,
     };
-    const user = await apiClient.create<CreateUser, User>("users", create_user);
+    const user = await apiClient.post<CreateUser, User>("users", create_user);
     setUsers((users) => [user, ...users]);
     setName("");
   };
 
   const updateUser = async () => {
     if (editUser === null || editUserUid === null) return;
-    const update_user = await apiClient.update<UpdateUser, User>(
+    const update_user = await apiClient.put<UpdateUser, User>(
       `users/${editUserUid}`,
       editUser
     );

@@ -1,11 +1,23 @@
-// import MainPage from "./pages/MainPage";
-import GamePage from "./pages/GamePage";
+import { useRoutes } from "react-router-dom";
+import routes from "./Routes";
+import TopBar from "./TopBar";
+import useFirebase from "./hooks/useFirebase";
+import { useUser } from "./hooks/useUser";
+import { ApiClientProvider } from "./lib/ApiClientContext";
 
 function App() {
+  const routing = useRoutes(routes);
+  const { user, loading } = useUser();
+  useFirebase();
+
   return (
     <>
-      <h1>test-app</h1>
-      <GamePage />
+      <ApiClientProvider user={user}>
+        <>
+          <TopBar />
+          {!loading && <>{routing}</>}
+        </>
+      </ApiClientProvider>
     </>
   );
 }

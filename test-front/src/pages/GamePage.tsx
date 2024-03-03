@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Input, Box, Button } from "@mui/material";
-import ApiClient from "../ApiClient";
+import { useApiClient } from "../lib/ApiClientContext";
+import { useUser } from "../hooks/useUser";
 
 interface LogEntry {
   message: string;
@@ -23,8 +24,8 @@ const ChatApp = (): JSX.Element => {
   const [retryCount, setRetryCount] = useState(0);
 
   const [gameId, setGameId] = useState("");
-
-  const apiClient = new ApiClient();
+  const { apiClient } = useApiClient();
+  const { user } = useUser();
 
   const logMessage = (msg: string, type = "status") => {
     setLog((prevLog) => [...prevLog, { message: msg, type: type }]);
@@ -121,10 +122,14 @@ const ChatApp = (): JSX.Element => {
 
     const message: Message = { message: text };
     socket.send(JSON.stringify(message));
-    apiClient.create(`games/${gameId}`, message);
+    apiClient.post(`games/${gameId}`, message);
 
     setInputText("");
   };
+
+  if (!user) {
+    return <></>;
+  }
 
   return (
     <Box>
