@@ -34,13 +34,21 @@ fn get_env(key: &str) -> Result<String, ConfigError> {
     })
 }
 
+pub fn get_firestore_config() -> Result<FirestoreConfig, ConfigError> {
+    Ok(FirestoreConfig {
+        credentials: serde_json::from_str(&get_env("CREDENTIALS_JSON")?)?,
+    })
+}
+
+pub fn get_auth_config() -> Result<AuthConfig, ConfigError> {
+    Ok(AuthConfig {
+        allowed_user_uids: serde_json::from_str(&get_env("ALLOWED_USER_UIDS")?)?,
+    })
+}
+
 pub fn config() -> Result<Config, ConfigError> {
     Ok(Config {
-        firestore: FirestoreConfig {
-            credentials: serde_json::from_str(&get_env("CREDENTIALS_JSON")?)?,
-        },
-        auth: AuthConfig {
-            allowed_user_uids: serde_json::from_str(&get_env("ALLOWED_USER_UIDS")?)?,
-        },
+        firestore: get_firestore_config()?,
+        auth: get_auth_config()?,
     })
 }

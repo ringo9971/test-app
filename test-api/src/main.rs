@@ -25,7 +25,7 @@ async fn main() -> Result<(), Error> {
                 Cors::default()
                     .allowed_origin(&allowed_origin)
                     .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
-                    .allowed_header(header::CONTENT_TYPE)
+                    .allowed_headers(vec![header::CONTENT_TYPE, header::AUTHORIZATION])
                     .max_age(3600),
             )
             .app_data(web::Data::new(server.clone()))
